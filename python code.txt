@@ -1,0 +1,64 @@
+!pip install scikit-learn
+import os
+from google.colab import files
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
+# Print the current working directory
+print("Current Working Directory:", os.getcwd())
+
+# List files in the current directory
+print("Files in the Directory:", os.listdir())
+
+# Upload the 'gt_2014.csv' file
+uploaded = files.upload()
+
+# Get the file name from the uploaded files
+file_name = list(uploaded.keys())[0]
+
+# Load the dataset
+df = pd.read_csv(file_name)
+
+# Assuming your features are in columns 'AT', 'AP', 'AH', ..., 'CDP'
+# and the target variable is in 'CO' and 'NOX'
+features = df[['AT', 'AP', 'AH', 'AFDP', 'GTEP', 'TIT', 'TAT', 'TEY', 'CDP']]
+target_CO = df['CO']
+target_NOX = df['NOX']
+
+# Split the data into training and testing sets
+X_train_CO, X_test_CO, y_train_CO, y_test_CO = train_test_split(features, target_CO, test_size=0.2, random_state=42)
+X_train_NOx, X_test_NOx, y_train_NOx, y_test_NOx = train_test_split(features, target_NOX, test_size=0.2, random_state=42)
+
+# Create linear regression models
+model_CO = LinearRegression()
+model_NOx = LinearRegression()
+
+# Train the models
+model_CO.fit(X_train_CO, y_train_CO)
+model_NOx.fit(X_train_NOx, y_train_NOx)
+
+# Make predictions
+predictions_CO = model_CO.predict(X_test_CO)
+predictions_NOx = model_NOx.predict(X_test_NOx)
+
+# Evaluate the models
+mse_CO = mean_squared_error(y_test_CO, predictions_CO)
+mae_CO = mean_absolute_error(y_test_CO, predictions_CO)
+r2_CO = r2_score(y_test_CO, predictions_CO)
+
+mse_NOx = mean_squared_error(y_test_NOx, predictions_NOx)
+mae_NOx = mean_absolute_error(y_test_NOx, predictions_NOx)
+r2_NOx = r2_score(y_test_NOx, predictions_NOx)
+
+# Display the evaluation metrics
+print("CO Emission Predictions:")
+print("Mean Squared Error:", mse_CO)
+print("Mean Absolute Error:", mae_CO)
+print("R-squared:", r2_CO)
+
+print("\nNOX Emission Predictions:")
+print("Mean Squared Error:", mse_NOx)
+print("Mean Absolute Error:", mae_NOx)
+print("R-squared:", r2_NOx)
