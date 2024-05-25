@@ -4,7 +4,10 @@ from google.colab import files
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Print the current working directory
 print("Current Working Directory:", os.getcwd())
@@ -27,9 +30,13 @@ features = df[['AT', 'AP', 'AH', 'AFDP', 'GTEP', 'TIT', 'TAT', 'TEY', 'CDP']]
 target_CO = df['CO']
 target_NOX = df['NOX']
 
+# Add polynomial features
+poly = PolynomialFeatures(degree=2)
+features_poly = poly.fit_transform(features)
+
 # Split the data into training and testing sets
-X_train_CO, X_test_CO, y_train_CO, y_test_CO = train_test_split(features, target_CO, test_size=0.2, random_state=42)
-X_train_NOx, X_test_NOx, y_train_NOx, y_test_NOx = train_test_split(features, target_NOX, test_size=0.2, random_state=42)
+X_train_CO, X_test_CO, y_train_CO, y_test_CO = train_test_split(features_poly, target_CO, test_size=0.2, random_state=42)
+X_train_NOx, X_test_NOx, y_train_NOx, y_test_NOx = train_test_split(features_poly, target_NOX, test_size=0.2, random_state=42)
 
 # Create linear regression models
 model_CO = LinearRegression()
@@ -62,3 +69,45 @@ print("\nNOX Emission Predictions:")
 print("Mean Squared Error:", mse_NOx)
 print("Mean Absolute Error:", mae_NOx)
 print("R-squared:", r2_NOx)
+
+# Visualize CO Emission Predictions
+plt.figure(figsize=(12, 6))
+
+# Scatter plot for actual vs predicted CO emissions
+plt.subplot(1, 2, 1)
+sns.scatterplot(x=y_test_CO, y=predictions_CO)
+plt.title('Actual vs Predicted CO Emissions')
+plt.xlabel('Actual CO Emissions')
+plt.ylabel('Predicted CO Emissions')
+
+# Residual plot for CO emissions
+plt.subplot(1, 2, 2)
+residuals_CO = y_test_CO - predictions_CO
+sns.histplot(residuals_CO, kde=True)
+plt.title('Residuals for CO Emissions')
+plt.xlabel('Residuals')
+plt.ylabel('Frequency')
+
+plt.tight_layout()
+plt.show()
+
+# Visualize NOX Emission Predictions
+plt.figure(figsize=(12, 6))
+
+# Scatter plot for actual vs predicted NOX emissions
+plt.subplot(1, 2, 1)
+sns.scatterplot(x=y_test_NOx, y=predictions_NOx)
+plt.title('Actual vs Predicted NOX Emissions')
+plt.xlabel('Actual NOX Emissions')
+plt.ylabel('Predicted NOX Emissions')
+
+# Residual plot for NOX emissions
+plt.subplot(1, 2, 2)
+residuals_NOx = y_test_NOx - predictions_NOx
+sns.histplot(residuals_NOx, kde=True)
+plt.title('Residuals for NOX Emissions')
+plt.xlabel('Residuals')
+plt.ylabel('Frequency')
+
+plt.tight_layout()
+plt.show()
